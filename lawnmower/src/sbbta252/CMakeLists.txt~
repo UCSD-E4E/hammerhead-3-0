@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(os5000)
+project(sbbta252)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation rosconsole roscpp sensor_msgs tf)
+find_package(catkin REQUIRED COMPONENTS rosconsole message_generation dynamic_reconfigure nav roscpp sensor_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -22,8 +22,8 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation r
 ## Generate messages in the 'msg' folder
  add_message_files(
    FILES
-   DepthMessage.msg
-   HeadingMessage.msg
+   sbbta252data.msg
+#   Message2.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -35,12 +35,11 @@ find_package(catkin REQUIRED COMPONENTS dynamic_reconfigure message_generation r
 
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
-   DEPENDENCIES
-   sensor_msgs
+#   DEPENDENCIES
+#   sensor_msgs
  )
 
-generate_dynamic_reconfigure_options(cfg/os5000.cfg)
-
+generate_dynamic_reconfigure_options(cfg/sbbta252Params.cfg)
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -52,8 +51,8 @@ generate_dynamic_reconfigure_options(cfg/os5000.cfg)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES os5000
-#  CATKIN_DEPENDS dynamic_reconfigure rosconsole roscpp sensor_msgs tf
+#  LIBRARIES sbbta252
+#  CATKIN_DEPENDS dynamic_reconfigure nav roscpp sensor_msgs
 #  DEPENDS system_lib
 )
 
@@ -69,27 +68,22 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(os5000
-#   src/${PROJECT_NAME}/os5000.cpp
+# add_library(sbbta252
+#   src/${PROJECT_NAME}/sbbta252.cpp
 # )
 
-#:# Declare a cpp executable
- add_executable(oscompass src/os5000_core.cpp src/os5000_ros.cpp src/serial.cpp src/timing.cpp)
-add_executable(listener src/os5000_listener.cpp)
+## Declare a cpp executable
+add_executable(sbbta252 src/sbbta252.cpp src/serial.cpp src/timing.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(os5000_node os5000_generate_messages_cpp)
-add_dependencies(oscompass ${PROJECT_NAME}_gencfg)
-add_dependencies(listener ${PROJECT_NAME}_gencfg)
+# add_dependencies(sbbta252_node sbbta252_generate_messages_cpp)
+
 ## Specify libraries to link a library or executable target against
- target_link_libraries(oscompass
+ target_link_libraries(sbbta252
    ${catkin_LIBRARIES}
  )
 
- target_link_libraries(listener
-   ${catkin_LIBRARIES}
- )
 #############
 ## Install ##
 #############
@@ -105,7 +99,7 @@ add_dependencies(listener ${PROJECT_NAME}_gencfg)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS os5000 os5000_node
+# install(TARGETS sbbta252 sbbta252_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -119,18 +113,18 @@ add_dependencies(listener ${PROJECT_NAME}_gencfg)
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
+ install(FILES
+   sbbta252.launch
 #   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+ )
 
 #############
 ## Testing ##
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_os5000.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_sbbta252.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

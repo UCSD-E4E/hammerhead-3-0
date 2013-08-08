@@ -86,6 +86,9 @@ add_executable(listener src/os5000_listener.cpp)
    ${catkin_LIBRARIES}
  )
 
+ target_link_libraries(listener
+   ${catkin_LIBRARIES}
+ )
 #############
 ## Install ##
 #############

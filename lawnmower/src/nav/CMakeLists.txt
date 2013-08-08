@@ -79,7 +79,7 @@ add_executable(nav src/nav.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(nav_node nav_generate_messages_cpp)
-
+add_dependencies(nav ${PROJECT_NAME}_gencfg)
 ## Specify libraries to link a library or executable target against
  target_link_libraries(nav
    ${catkin_LIBRARIES}

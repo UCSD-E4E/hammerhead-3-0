@@ -4,7 +4,7 @@ PACKAGE='os5000'
 import roslib
 roslib.load_manifest(PACKAGE)
 
-from dynamic_reconfigure.parameter_generator_catkin import *
+from dynamic_reconfigure.parameter_generator import *
 
 gen = ParameterGenerator()
 #       Name          Type      Level Description                                    Default Min   Max
