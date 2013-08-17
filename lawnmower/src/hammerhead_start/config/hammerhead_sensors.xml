@@ -12,8 +12,9 @@
       <param name="time_offset" value="-0.040" />
       <param name="port"  type="string" value="/dev/ttyACM0" />
       <param name="autostart" type="bool" value="true" />
-      <param name="frameid"  type="string" value="imu" />
+      <param name="frame_id"  type="string" value="base_footprint" /> <!--hammerhead/imu-->
       <param name="autocalibrate" type="bool" value="true" />
       <param name="angular_velocity_stdev" type="double" value="0.00017"/>
+      <remap from="/imu/data" to="/mstrain_data"/>
 </node>
 </launch>

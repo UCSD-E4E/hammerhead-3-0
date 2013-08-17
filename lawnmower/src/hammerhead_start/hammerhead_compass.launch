@@ -1,0 +1,12 @@
+<launch>
+<machine name="control" address="hammerhead-control" default="true" user="hammerhead-control" env-loader="/home/hammerhead-control/env.sh" />
+<node pkg="os5000" type="oscompass" name="compass" machine="control">
+    <param name="baud" value="115200"/>
+    <param name="init_time" value="3"/>
+    <param name="port" value="/dev/ttyUSB0"/>
+    <param name="pub_topic_name" value="os5000_data"/>
+    <param name="rate" value="50"/>
+    <param name="reconnect" value="false"/>
+</node>
+</launch>
+

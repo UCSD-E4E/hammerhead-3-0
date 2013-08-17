@@ -1,4 +1,4 @@
 <launch>
-  <machine name="control" address="hammerhead-control"  default="true" />
+  <machine name="control" address="hammerhead-control" default="true" env-loader="/home/hammerhead-control/hammerhead-3-0/lawnmower/devel/env.sh" />
   <machine name="vision" address="hammerhead-vision" />
 </launch>

@@ -1,6 +1,6 @@
 <launch>
 
-  <node pkg="sbBTA252" type="sbBTA252" name="thrusters" machine="control"/>
+  <node pkg="sbbta252" type="sbbta252" name="thrusters" machine="control"/>
 
   <node pkg="pid" type="pidserver" name="pid" machine="control"/>
 
@@ -16,16 +16,16 @@
 
 <node pkg="nav" type="nav" name="nav" machine="control">
     <param name="rate" value="200"/>
-    <param name="gain_roll_p"   value="1.0"/>
+    <param name="gain_roll_p"   value="0.0"/>
     <param name="gain_roll_i"   value="0.0"/>
     <param name="gain_roll_d"   value="0.0"/>
-    <param name="gain_pitch_p"  value="1.0"/>
+    <param name="gain_pitch_p"  value="0.0"/>
     <param name="gain_pitch_i"  value="0.0"/>
     <param name="gain_pitch_d"  value="0.0"/>
-    <param name="gain_yaw_p"    value="1.0"/>
+    <param name="gain_yaw_p"    value="0.0"/>
     <param name="gain_yaw_i"    value="0.0"/>
     <param name="gain_yaw_d"    value="0.05"/>
-    <param name="gain_depth_p"  value="1.0"/>
+    <param name="gain_depth_p"  value="0.0"/>
     <param name="gain_depth_i"  value="0.0"/>
     <param name="gain_depth_d"  value="0.0"/>
     <param name="gain_speed_p"  value="10.0"/>
