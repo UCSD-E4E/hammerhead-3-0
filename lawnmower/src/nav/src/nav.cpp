@@ -136,10 +136,11 @@ void Nav::publishControlInputs(ros::Publisher *pub_control_inputs)
 void Nav::microstrainCallback(const sensor_msgs::Imu::ConstPtr& msg)
 {
     // Convert quaternion to RPY.
-    tf::Quaternion q;
+    tf::Quaternion q_imu,q_robot;
     tf::quaternionMsgToTF(msg->orientation, q);
+    tf::transformQuaternion("/imu",q_imu,"base_footprint",q_robot);
     tf::Matrix3x3(q).getEulerYPR(yaw, pitch, roll);
-  
+   /*
     if (roll>0)
         roll = 3.14159-roll;
     else
@@ -150,7 +151,7 @@ void Nav::microstrainCallback(const sensor_msgs::Imu::ConstPtr& msg)
     pitch = -roll*180/M_PI;
     roll = -temp*180/M_PI;
     yaw = yaw*180/M_PI;
-    
+
     // Gabe
     // Correction of data code. Take roll and flip it
     if (roll_upsidedown)
@@ -164,7 +165,7 @@ void Nav::microstrainCallback(const sensor_msgs::Imu::ConstPtr& msg)
 			roll += M_PI;
 		}
 	}
-    
+   */
     ROS_DEBUG("Microstrain RPY = (%lf, %lf, %lf)", roll, pitch, yaw);
     //ROS_DEBUG_THROTTLE(15, "Microstrain RPY = (%lf, %lf, %lf)", roll*180/M_PI, pitch*180/M_PI, yaw*180/M_PI);
     //ROS_DEBUG("Microstrain Quaternions = (%lf, %lf, %lf, %lf)", msg->orientation.x, msg->orientation.y, msg->orientation.z, msg->orientation.w);
@@ -258,7 +259,7 @@ void Nav::configCallback(nav::navParamsConfig& config, uint32_t level)
     alpha_surge=config.alpha_surge;
     min_int_surge = config.min_int_surge;
     max_int_surge = config.max_int_surge;
-    
+
     roll_upsidedown = config.roll_upsidedown;
 } // end configCallback()
 
@@ -315,7 +316,7 @@ int main(int argc, char **argv)
     private_node_handle_.param("min_int_depth", nav->min_int_depth, double(0.));
     private_node_handle_.param("max_int_depth", nav->max_int_depth, double(0.));
     private_node_handle_.param("min_int_surge", nav->min_int_surge, double(0.));
-	private_node_handle_.param("max_int_surge", nav->max_int_surge, double(0.));    
+	private_node_handle_.param("max_int_surge", nav->max_int_surge, double(0.));
 	private_node_handle_.param("alpha_roll", nav->alpha_roll, double(0.));
     private_node_handle_.param("alpha_pitch", nav->alpha_pitch, double(0.));
     private_node_handle_.param("alpha_yaw", nav->alpha_yaw, double(0.));
@@ -327,7 +328,7 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(rate);
 
     // Set up ROS subscribers and clients so that data can be found.
-    
+
     // !! Removed subscriptions to compass and planner nodes
     // ros::Subscriber compass_sub = n.subscribe("os5000_data", 1000, &Nav::compassCallback, nav);
        ros::Subscriber compass_depth = n.subscribe("depthMessage", 1000, &Nav::compassDepthCallback, nav);
@@ -412,7 +413,7 @@ int main(int argc, char **argv)
         pid_srv.request.previous_error = nav->prev_pitch_error;
         pid_srv.request.previous_integrator_val = nav->prev_pitch_int;
 		pid_srv.request.previous_derivative_val = nav->prev_pitch_deriv;
-		pid_srv.request.alpha = nav->alpha_pitch;       
+		pid_srv.request.alpha = nav->alpha_pitch;
  		nav->dt_pitch = dt;
         pid_srv.request.dt = nav->dt_pitch;
         pid_srv.request.gain_p = nav->gain_pitch_p;
@@ -476,7 +477,7 @@ int main(int argc, char **argv)
         pid_srv.request.previous_error = nav->prev_yaw_error;
         pid_srv.request.previous_integrator_val = nav->prev_yaw_int;
 		pid_srv.request.previous_derivative_val= nav->prev_yaw_deriv;
-		pid_srv.request.alpha = nav->alpha_yaw;               
+		pid_srv.request.alpha = nav->alpha_yaw;
 		nav->dt_yaw = dt;
         pid_srv.request.dt = nav->dt_yaw;
         pid_srv.request.gain_p = nav->gain_yaw_p;
