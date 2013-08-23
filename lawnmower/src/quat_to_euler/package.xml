@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package>
-  <name>mission_controller</name>
+  <name>quat_to_euler</name>
   <version>0.0.0</version>
-  <description>The mission_controller package</description>
+  <description>The quat_to_euler package</description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="pnaughto@eng.ucsd.edu">Perry Naughton</maintainer>
+  <maintainer email="pnaughto@eng.ucsd.edu">perry</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://ros.org/wiki/mission_controller</url> -->
+  <!-- <url type="website">http://ros.org/wiki/quat_to_euler</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -41,11 +41,11 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>
-  <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>tf</build_depend>
   <run_depend>rospy</run_depend>
-  <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
+  <run_depend>tf</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
