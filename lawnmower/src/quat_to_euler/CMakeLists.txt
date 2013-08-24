@@ -21,10 +21,10 @@ find_package(catkin REQUIRED COMPONENTS rospy std_msgs tf)
 
 ## Generate messages in the 'msg' folder
  add_message_files(
-#   FILES
+   FILES
 Eulers.msg
 #   Message2.msg
-# )
+ )
 
 ## Generate services in the 'srv' folder
 # add_service_files(

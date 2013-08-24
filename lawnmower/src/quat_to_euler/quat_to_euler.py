@@ -11,7 +11,7 @@ import tf
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu
 from quat_to_euler.msg import Eulers
-
+#from Eulers.msg import Eulers
 class QuatToEuler():
     def __init__(self):
         self.got_new_msg = False

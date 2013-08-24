@@ -80,6 +80,7 @@ add_executable(listener src/os5000_listener.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(os5000_node os5000_generate_messages_cpp)
+add_dependencies(oscompass ${catkin_EXPORTED_TARGETS})
 add_dependencies(oscompass ${PROJECT_NAME}_gencfg)
 add_dependencies(listener ${PROJECT_NAME}_gencfg)
 ## Specify libraries to link a library or executable target against

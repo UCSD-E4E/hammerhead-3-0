@@ -133,13 +133,13 @@ void Nav::publishControlInputs(ros::Publisher *pub_control_inputs)
  * Callback for IMU data.
  *----------------------------------------------------------------------------*/
 
-void Nav::microstrainCallback(const sensor_msgs::Imu::ConstPtr& msg)
+void Nav::microstrainCallback(const tf::TransformListener& listener, const sensor_msgs::Imu::ConstPtr& msg)
 {
     // Convert quaternion to RPY.
     tf::Quaternion q_imu,q_robot;
-    tf::quaternionMsgToTF(msg->orientation, q);
-    tf::transformQuaternion("/imu",q_imu,"base_footprint",q_robot);
-    tf::Matrix3x3(q).getEulerYPR(yaw, pitch, roll);
+    tf::quaternionMsgToTF(msg->orientation, q_imu); //was just q
+    listener.transformQuaternion("/imu",q_imu,"base_footprint",q_robot);
+    tf::Matrix3x3(q_imu).getEulerYPR(yaw, pitch, roll);
    /*
     if (roll>0)
         roll = 3.14159-roll;
