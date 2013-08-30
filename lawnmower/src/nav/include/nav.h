@@ -92,7 +92,7 @@ public:
 	void compassDepthCallback(const os5000::DepthMessage::ConstPtr& msg);
 	
     //! Callback function for compass data
-    void microstrainCallback(const tf::TranformListener& listener, const sensor_msgs::Imu::ConstPtr& msg);
+    void microstrainCallback(/*const tf::TranformListener& listener, */const sensor_msgs::Imu::ConstPtr& msg);
 
     //! Callback function for Target States
     void targetStatesCallback(const planner::TargetStates::ConstPtr& msg);

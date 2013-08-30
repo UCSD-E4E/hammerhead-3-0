@@ -6,6 +6,8 @@
       <param name="approximate_sync" value="true"/>
       <param name="base_link_frame_id" value="/base_footprint"/>
       <param name="publish_tf" value="true"/>
+		<param name="ref_frame_motion_threshold" value="20"/>
+	 	<param name="ref_frame_change_method" value="1"/>
    </node>
 
    <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf" machine="vision">
