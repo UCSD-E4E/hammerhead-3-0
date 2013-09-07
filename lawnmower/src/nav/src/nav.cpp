@@ -136,13 +136,17 @@ void Nav::publishControlInputs(ros::Publisher *pub_control_inputs)
 void Nav::microstrainCallback(/*const tf::TransformListener& listener, */const sensor_msgs::Imu::ConstPtr& msg)
 {
 	 //tf
-	 //tf::TransformListener listener;
+	 tf::TransformListener listener;
     // Convert quaternion to RPY.
     tf::Quaternion q_imu,q_robot;
     tf::quaternionMsgToTF(msg->orientation, q_imu); //was just q
 	 //listener.transformQuaternion(msg->orientation);
     //listener.transformQuaternion("/imu",q_imu,"base_footprint");
-    tf::Matrix3x3(q_imu).getEulerYPR(yaw, pitch, roll);
+	std::string base_frame = "base_footprint";
+	tf::Stamped<tf::Quaternion> q(q_imu,msg->header.stamp,msg->header.frame_id);
+   //transformQuaternion(target_frame,stamped_in,stamped_out)
+	listener.transformQuaternion(base_frame,q,q);
+    tf::Matrix3x3(q).getEulerYPR(yaw, pitch, roll); //was q_imu
 	 
    /*
     if (roll>0)
