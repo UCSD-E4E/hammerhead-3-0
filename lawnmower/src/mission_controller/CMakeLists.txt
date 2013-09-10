@@ -4,7 +4,7 @@ project(mission_controller)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp message_generation rospy std_msgs)
+find_package(catkin REQUIRED COMPONENTS std_msgs roscpp rospy tf message_generation)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -20,9 +20,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp message_generation rospy std_msgs
 #######################################
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   TargetWaypoints.msg
+   add_message_files(
+DIRECTORY msg   
+FILES
+   posex.msg
 #   Message2.msg
  )
 
@@ -34,10 +35,10 @@ find_package(catkin REQUIRED COMPONENTS roscpp message_generation rospy std_msgs
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-#   DEPENDENCIES
-#   std_msgs
- )
+generate_messages(
+DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -50,9 +51,9 @@ find_package(catkin REQUIRED COMPONENTS roscpp message_generation rospy std_msgs
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES mission_controller
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+# LIBRARIES mission_controller
+ CATKIN_DEPENDS roscpp rospy tf message_runtime std_msgs
+  DEPENDS message_runtime std_msgs #system_lib
 )
 
 ###########
@@ -71,8 +72,8 @@ include_directories(
 #   src/${PROJECT_NAME}/mission_controller.cpp
 # )
 
-## Declare a cpp executables
-#add_executable(mission_controller src/mission_controller_node.cpp)
+## Declare a cpp executable
+# add_executable(mission_controller_node src/mission_controller_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
