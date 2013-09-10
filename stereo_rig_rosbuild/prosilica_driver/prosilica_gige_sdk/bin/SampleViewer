@@ -1,0 +1,5 @@
+#!/bin/bash
+PKG_DIR=$(rospack find prosilica_gige_sdk)
+LIB_DIR=${PKG_DIR}/lib
+EXE_DIR=${PKG_DIR}/bin
+LD_LIBRARY_PATH=${LIB_DIR}:${LD_LIBRARY_PATH} ${EXE_DIR}/SampleViewerBadRpath $@

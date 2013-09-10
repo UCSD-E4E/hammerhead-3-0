@@ -1,0 +1,70 @@
+<launch>
+    <arg name="left_ip"      default="192.168.3.102"/>
+    <arg name="right_ip"     default="192.168.3.101"/>
+    <arg name="left_yaml"    default="101"/>
+    <arg name="right_yaml"   default="102"/>
+    <arg name="start_stereo" default="false"/>
+
+    <group ns="stereo">
+        <node pkg="prosilica_camera" type="prosilica_node" name="left" output="screen">
+            <rosparam command="load" file="$(find natgeo)/camera_info/gc750c.yaml"/>
+            <param name="ip_address" value="$(arg left_ip)"/>
+            <param name="exposure_auto_max" value=".03"/>
+            <param name="trigger_mode" value="fixedrate"/>
+            <remap from="camera" to="left"/>
+        </node>
+
+        <node pkg="prosilica_camera" type="prosilica_node" name="right" output="screen">
+            <rosparam command="load" file="$(find natgeo)/camera_info/gc750c.yaml"/>
+            <param name="ip_address" value="$(arg right_ip)"/>
+            <param name="exposure_auto_max" value=".03"/>
+            <param name="trigger_mode" value="syncin2"/>
+            <remap from="camera" to="right"/>
+        </node>
+
+        <group if="$(arg start_stereo)">
+            <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
+                <param name="approximate_sync" value="True"/>
+                <param name="queue_size"       value="10"/>
+            </node>
+        </group>
+    </group>
+
+<node pkg="os5000" type="oscompass" name="compass">
+    <param name="baud" value="115200"/>
+    <param name="init_time" value="3"/>
+    <param name="port" value="/dev/ttyUSB0"/>
+    <param name="pub_topic_name" value="os5000_data"/>
+    <param name="rate" value="50"/>
+    <param name="reconnect" value="false"/>
+</node>
+<!-- imu -->
+  <node pkg="microstrain_3dmgx2_imu" type="imu_node" name="microstrain_3dmgx2_node" output="screen">
+      <param name="time_offset" value="-0.040" />
+      <param name="port"  type="string" value="/dev/ttyACM0" />
+      <param name="autostart" type="bool" value="true" />
+      <param name="frameid"  type="string" value="imu" />
+      <param name="autocalibrate" type="bool" value="true" />
+      <param name="angular_velocity_stdev" type="double" value="0.00017"/>
+</node>
+
+    <group if="$(arg start_stereo)">
+        <node pkg="image_view" type="stereo_view" name="stereo_view" output="screen">
+            <remap from="stereo" to="stereo"/>
+            <remap from="image"  to="image_rect_color"/>
+            <param name="approximate_sync" value="True"/>
+        </node>
+    </group>
+
+<node pkg="tf" type="static_transform_publisher" name="base_link"
+args="0 0 0 0 0 0 /base_link /stereo 100"/>
+
+<node pkg="tf" type="static_transform_publisher" name="camera_optical_frame"
+args="0 0 0 0 0 0 /stereo /stereo_optical_frame 100"/>
+
+    <node pkg="rosbag" type="record" name="rosbag_record"
+        args="record /stereo/left/image_raw /stereo/left/camera_info
+                     /stereo/right/image_raw /stereo/right/camera_info /tf /imu/data /os5000_data /use_sim_time:=true -O /home/uwstereo/fuerte_workspace/sandbox/3D-reconstruction/natgeo/bags/test.bag">
+    </node>
+</launch>
+
