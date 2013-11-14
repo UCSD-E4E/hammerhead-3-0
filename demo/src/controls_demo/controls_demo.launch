@@ -16,7 +16,7 @@
   </group>
 
   <!-- Launch target tracker node -->
-  <node name="controls_demo" pkg="controls_demo" type="target_tracker.py" />
+  <node name="target_tracker" pkg="controls_demo" type="target_tracker.py" />
 
   <!-- Launch controls demo node -->
   <node name="controls_demo" pkg="controls_demo" type="controls_demo.py" />
