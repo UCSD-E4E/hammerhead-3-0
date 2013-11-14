@@ -127,12 +127,15 @@ class TargetTracker:
         # Convert image to HSV for better color segmentation
         self.left_image = cv2.cvtColor(left_image, cv2.COLOR_BGR2HSV)
         
-        # Threshold image    
+        # Threshold image in HSV
         threshed_image = self.threshold_image(self.left_image)
+        
+        # Convert back to BGR so it doesn't look like Stingray is on acid
+        self.left_image = cv2.cvtColor(self.left_image, cv2.COLOR_HSV2BGR)
         
         # Calculate biggest contour and display contours
         biggest_contour = self.find_biggest_contour(threshed_image, self.left_image)
-        
+
         # Show incoming image in Left Camera window
         cv2.imshow('Left Camera', self.left_image)
         
@@ -154,8 +157,11 @@ class TargetTracker:
         # Convert image to HSV for better color segmentation
         self.right_image = cv2.cvtColor(right_image, cv2.COLOR_BGR2HSV)
         
-        # Threshold Image
+        # Threshold image in HSV
         threshed_image = self.threshold_image(self.right_image)
+        
+        # Convert back to BGR so it doesn't look like Stingray is on acid
+        self.right_image = cv2.cvtColor(self.right_image, cv2.COLOR_HSV2BGR)
         
         # Calculate biggest contour and display contours
         biggest_contour = self.find_biggest_contour(threshed_image, self.right_image)
