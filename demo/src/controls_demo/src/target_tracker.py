@@ -131,12 +131,12 @@ class TargetTracker:
         threshed_image = self.threshold_image(self.left_image)
         
         # Calculate biggest contour and display contours
-        biggest_region = self.find_biggest_contour(threshed_image, self.left_image)
+        biggest_contour = self.find_biggest_contour(threshed_image, self.left_image)
         
         # Show incoming image in Left Camera window
         cv2.imshow('Left Camera', self.left_image)
         
-        # Show thresholded image in Threshold window
+        # Show thresholded image in Left Threshold window
         cv2.imshow('Left Threshold', threshed_image)
         cv.WaitKey(3)
 
@@ -144,11 +144,27 @@ class TargetTracker:
     def handle_right_camera(self, data):
         """Handles incoming images from right stereo camera."""
         try:
-            self.right_image = self.bridge.imgmsg_to_cv(data, 'bgr8')
+            right_image = self.bridge.imgmsg_to_cv(data, 'bgr8')
         except cv_bridge.CvBridgeError, e:
             print e
             
+        # Convert incoming image (CvMat) to numpy array
+        right_image = numpy.asarray(right_image)
+        
+        # Convert image to HSV for better color segmentation
+        self.right_image = cv2.cvtColor(right_image, cv2.COLOR_BGR2HSV)
+        
+        # Threshold Image
+        threshed_image = self.threshold_image(self.right_image)
+        
+        # Calculate biggest contour and display contours
+        biggest_contour = self.find_biggest_contour(threshed_image, self.right_image)
+            
+        # Show incoming image in Right Camera Window
         cv2.imshow('Right Camera', self.right_image)
+        
+        # Show thresholded image in Right Threshold window
+        cv2.imshow('Right Threshold', threshed_image)
         cv.WaitKey(3)
 
 
@@ -159,11 +175,11 @@ class TargetTracker:
             
         # If the user depresses the left mouse button
         if event == cv.CV_EVENT_LBUTTONDOWN:
-            self.down_coord = (x, y)
+            self.down_coord = [x, y]
         
         # If the user releases the left mouse button
         elif event == cv.CV_EVENT_LBUTTONUP:
-            self.up_coord = (x, y)
+            self.up_coord = [x, y]
             
             # Put coordinates in order from lower x to higher x
             if self.down_coord[0] > self.up_coord[0]:
