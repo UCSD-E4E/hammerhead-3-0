@@ -1,10 +1,10 @@
 <launch>
 
   <!-- Launch Stingray -->
-  <include file="$(find hammerhead_start)/hammerhead.launch" />
+  <!--  <include file="$(find hammerhead_start)/hammerhead.launch" />-->
 
   <!-- Play bag file: TESTING ONLY -->
-  <node pkg="rosbag" type="play" name="rosbag" args="2.bag" />  
+  <node pkg="rosbag" type="play" name="rosbag" args="$(find controls_demo)/2.bag" />  
 
   <!-- Debayer and rectify raw images -->
   <group ns="stereo/left">
@@ -15,7 +15,10 @@
     <node pkg="image_proc" type="image_proc" name="image_proc_right" />
   </group>
 
-  <!-- Launch demo control node -->
+  <!-- Launch target tracker node -->
+  <node name="controls_demo" pkg="controls_demo" type="target_tracker.py" />
+
+  <!-- Launch controls demo node -->
   <node name="controls_demo" pkg="controls_demo" type="controls_demo.py" />
 
 </launch>
