@@ -8,14 +8,14 @@ from std_msgs.msg import Float32
 import sys
 
 
-#################################
+###
 ###
 ### Author: Antonella Wilby
 ### Email: awilby@ucsd.edu
 ###
 ### EXPLAIN WHAT THIS DOES
 ###
-#################################
+###
 
 ### TO DO
 # size windows based on screen size
@@ -42,6 +42,10 @@ class TargetTracker:
                        'low_hue':0, 'high_hue':255, \
                        'low_sat':0, 'high_sat':255, \
                        'low_val':0, 'high_val':255}
+        
+        # Variables for user-selected threshold selection          
+        self.down_coord = (-1,-1)         # Negative since area hasn't been selected yet
+        self.up_coord = (-1,-1)           # Negative since area hasn't been selected yet
         
         # Initialize all GUI elements
         self.initialize_gui()
@@ -75,7 +79,7 @@ class TargetTracker:
         
         # Set callback for mouse input to Left Camera window
         # Used to select regions of interest for target thresholding
-        #cv.SetMouseCallback('Left Camera', self.handle_mouse_left_camera, None)
+        cv.SetMouseCallback('Left Camera', self.handle_mouse_left_camera, None)
         
         # Instantiate OpenCV windows for displaying thresholded image
         cv.NamedWindow('Left Threshold', 3)
@@ -98,6 +102,7 @@ class TargetTracker:
         # Create buttons for auto-selecting red, green 
         #cv.CreateButton('red', 'Threshold Controls',  red_select, NULL, cv.CV_RADIOBOX)
         
+        
     def change_slider(self, name, new_thresh):
         """Changes the slider values for a specified slider and the new threshold."""
         self.thresholds[name] = new_thresh
@@ -108,21 +113,21 @@ class TargetTracker:
     def handle_left_camera(self, data):
         """Handles incoming images from left stereo camera."""
         try:
-            left_image = self.bridge.imgmsg_to_cv(data, 'bgr8')
+            self.left_image = self.bridge.imgmsg_to_cv(data, 'bgr8')
         except cv_bridge.CvBridgeError, e:
             print e
         
         # Threshold image    
-        threshed_image = self.threshold_image(left_image)
+        threshed_image = self.threshold_image(self.left_image)
         
         # Calculate biggest region and display contours
         biggest_region = self.find_biggest_region(threshed_image)
         
         # Draw contours and bounding box on image
-        self.draw_contours(left_image, biggest_region)
+        self.draw_contours(self.left_image, biggest_region)
 
         # Show incoming image in Left Camera window
-        cv.ShowImage('Left Camera', left_image)
+        cv.ShowImage('Left Camera', self.left_image)
         
         # Show thresholded image in Threshold window
         cv.ShowImage('Left Threshold', threshed_image)
@@ -132,11 +137,11 @@ class TargetTracker:
     def handle_right_camera(self, data):
         """Handles incoming images from right stereo camera."""
         try:
-            right_image = self.bridge.imgmsg_to_cv(data, 'bgr8')
+            self.right_image = self.bridge.imgmsg_to_cv(data, 'bgr8')
         except cv_bridge.CvBridgeError, e:
             print e
             
-        cv.ShowImage('Right Camera', right_image)
+        cv.ShowImage('Right Camera', self.right_image)
         cv.WaitKey(3)
 
 
@@ -144,36 +149,34 @@ class TargetTracker:
         """Handles incoming mouse input to the Left Camera window.
             Mouse input is used to select regions of interest (such as a colored target)
             and dynamically threshold image based on the colors in that region of interest."""
-        
-        down_coord = (0,0)
-        up_coord = (0,0)
             
         # If the user depresses the left mouse button
         if event == cv.CV_EVENT_LBUTTONDOWN:
-            down_coord = (x, y)
-            
-        elif event == cv.CV_EVENT_LBUTTONDOWN:
-             up_coord = (x, y)
-            
-        # Put coordinates in order from lower x to higher x
-        if down_coord[0] > up_coord[0]:
-            down_coord[0], up_coord[0] = up_coord[0], down_coord[0]
+            self.down_coord = (x, y)
         
-        # Put coordinates in order from lower y to higher y
-        if down_coord[1] > up_coord[1]:
-            down_coord[1], up_coord[1] = up_coord[1], down_coord[1]
+        # If the user releases the left mouse button
+        elif event == cv.CV_EVENT_LBUTTONUP:
+            self.up_coord = (x, y)
+            
+            # Put coordinates in order from lower x to higher x
+            if self.down_coord[0] > self.up_coord[0]:
+                self.down_coord[0], self.up_coord[0] = self.up_coord[0], self.down_coord[0]
+            
+            # Put coordinates in order from lower y to higher y
+            if self.down_coord[1] > self.up_coord[1]:
+                self.down_coord[1], self.up_coord[1] = self.up_coord[1], self.down_coord[1]
+        
+            selected_section = [(self.down_coord[0], self.up_coord[0]), (self.down_coord[1], self.up_coord[1])]
+            
+            self.process_selected_section(selected_section, self.left_image)
+        
     
-        selected_section = [(down_coord[0], up_coord[0]), (down_coord[1], up_coord[1])]
-        
-        self.process_selected_section(selected_section)
-        
     
     ### IMAGE PROCESSING FUNCTIONS ###
-    
-    
-    def process_selected_section(self, section):
+     
+    def process_selected_section(self, section, image):
         """ Thresholds image based on colors found on user-selected image section."""
-        
+
         new_thresholds= { 'high_green':0, 'low_green':255,\
                          'low_blue':255, 'low_val':255,\
                          'high_hue':0, 'high_val':0,\
@@ -214,8 +217,10 @@ class TargetTracker:
 
         # Now reset sliders to the found max and min
         self.thresholds = new_thresholds
-    
-    
+        for name in color:
+            self.change_slider("high_"+name, new_thresholds["high_"+name])
+            self.change_slider("low_"+name, new_thresholds["low_"+name])
+        
     
     
     def threshold_image(self, image):
@@ -265,22 +270,24 @@ class TargetTracker:
                 contours = contours.h_next()
                 
         else:
-            biggest_region = 0
+            biggest_region = None
                 
         # Return biggest region
         return biggest_region
     
+
     def draw_contours(self, image, biggest_region):
         """Draws contours of biggest region on image, then draws bounding box for the
             contour on image."""
             
-        # Draw contours of biggest region on image
-        cv.DrawContours(image, biggest_region, cv.RGB(255,255,255), \
+        if biggest_region is not None:
+            # Draw contours of biggest region on image
+            cv.DrawContours(image, biggest_region, cv.RGB(255,255,255), \
                         cv.RGB(0,255,0), 1, thickness=2, lineType=8, offset=(0,0))
         
-        # Draw bounding box in yellow of biggest region on image
-        bound_box = cv.BoundingRect(biggest_region, update=0)
-        cv.PolyLine( image, [[ (bound_box[0], bound_box[1]), \
+            # Draw bounding box in yellow of biggest region on image
+            bound_box = cv.BoundingRect(biggest_region, update=0)
+            cv.PolyLine( image, [[ (bound_box[0], bound_box[1]), \
                     (bound_box[0]+bound_box[2], bound_box[1]), \
                     (bound_box[0]+bound_box[2], bound_box[1]+bound_box[3]),\
                     (bound_box[0], bound_box[1]+bound_box[3]) ]], 1, cv.RGB(255,255,0) )
