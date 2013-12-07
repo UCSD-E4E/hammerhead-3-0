@@ -43,6 +43,15 @@ class TargetTracker:
         self.low_thresholds = {'hue': 0, 'val': 0, 'sat': 0}
         self.high_thresholds = {'hue': 179, 'val': 255, 'sat': 255}
         
+        # Has target been set? (i.e., thresholds selected)
+        self.target_set = False 
+        
+        # Biggest contour in image that represents target
+        self.biggest_contour = None
+        
+        # Bounding box of biggest contour
+        self.bound_box = None
+        
         # Variables for user-selected threshold selection          
         self.down_coord = (-1,-1)         # Negative since area hasn't been selected yet
         self.up_coord = (-1,-1)           # Negative since area hasn't been selected yet
@@ -59,8 +68,16 @@ class TargetTracker:
         # Subscribe to rectified and debayehue image topic from right camera NOTE: this is currently raw
         #rospy.Subscriber('/stereo/right/image_raw', sm.Image, self.handle_right_camera)
         
-        # Publish distance from target
+        # Publisher for distance from target
         self.distance_pub = rospy.Publisher('distance_from_target', Float32)
+        
+        # Compute distance from target and publish
+        #while not rospy.is_shutdown():
+        #    if self.biggest_contour is not None:
+        #        distance = self.distance_from_target(biggest_contour)
+        #        self.distance_pub.publish(distance)
+        #        rospy.sleep(0.1)
+        
         
         
     ### GUI INITIALIZATION ###
@@ -74,8 +91,8 @@ class TargetTracker:
         # Instantiate OpenCV windows for displaying incoming images
         cv.NamedWindow('Left Camera', 1)
         cv.MoveWindow('Left Camera', 0, 0)
-        cv.NamedWindow('Right Camera', 2)
-        cv.MoveWindow('Right Camera', 760, 0)
+        #cv.NamedWindow('Right Camera', 2)
+        #cv.MoveWindow('Right Camera', 760, 0)
         
         # Set callback for mouse input to Left Camera window
         # Used to select regions of interest for target thresholding
@@ -84,8 +101,8 @@ class TargetTracker:
         # Instantiate OpenCV windows for displaying thresholded image
         cv.NamedWindow('Left Threshold', 3)
         cv.MoveWindow('Left Threshold', 0, 480)
-        cv.NamedWindow('Right Threshold', 4)
-        cv.MoveWindow('Right Threshold', 760, 480)
+        #cv.NamedWindow('Right Threshold', 4)
+        #cv.MoveWindow('Right Threshold', 760, 480)
         
         # Instantiate controls window
         cv.NamedWindow('Threshold Controls', 5)
@@ -134,7 +151,7 @@ class TargetTracker:
         self.left_image = cv2.cvtColor(self.left_image, cv2.COLOR_HSV2BGR)
         
         # Calculate biggest contour and display contours
-        biggest_contour = self.find_biggest_contour(threshed_image, self.left_image)
+        biggest_contour, bound_box = self.find_biggest_contour(threshed_image, self.left_image)
 
         # Show incoming image in Left Camera window
         cv2.imshow('Left Camera', self.left_image)
@@ -142,6 +159,17 @@ class TargetTracker:
         # Show thresholded image in Left Threshold window
         cv2.imshow('Left Threshold', threshed_image)
         cv.WaitKey(3)
+        
+        # Compute distance from target
+        distance = self.distance_from_target(biggest_contour)
+        
+        print distance
+        
+        # If target is found, publish distance, otherwise publish NaN
+        if self.target_set:
+            self.distance_pub.publish(distance)
+        else:
+            self.distance_pub.publish(float('nan'))
 
 
     def handle_right_camera(self, data):
@@ -164,7 +192,7 @@ class TargetTracker:
         self.right_image = cv2.cvtColor(self.right_image, cv2.COLOR_HSV2BGR)
         
         # Calculate biggest contour and display contours
-        biggest_contour = self.find_biggest_contour(threshed_image, self.right_image)
+        self.biggest_contour = self.find_biggest_contour(threshed_image, self.right_image)
             
         # Show incoming image in Right Camera Window
         cv2.imshow('Right Camera', self.right_image)
@@ -176,12 +204,13 @@ class TargetTracker:
 
     def handle_mouse_left_camera(self, event, x, y, flags, param):
         """Handles incoming mouse input to the Left Camera window.
-            Mouse input is used to select regions of interest (such as a colohue target)
+            Mouse input is used to select regions of interest (such as a colored target)
             and dynamically threshold image based on the colors in that region of interest."""
             
         # If the user depresses the left mouse button
         if event == cv.CV_EVENT_LBUTTONDOWN:
             self.down_coord = [x, y]
+            self.target_set = True
         
         # If the user releases the left mouse button
         elif event == cv.CV_EVENT_LBUTTONUP:
@@ -246,9 +275,6 @@ class TargetTracker:
     def threshold_image(self, image):
         """my name is ms. docstring i am married to mr. docstring"""
         
-        # Create image to store thresholded image
-        #threshed_image = cv.CreateImage(cv.GetSize(image), 8, 1)
-        
         # Get thresholds for selected color
         lower_thresh = [ self.low_thresholds['hue'], self.low_thresholds['sat'], self.low_thresholds['val'] ]
         upper_thresh = [ self.high_thresholds['hue'], self.high_thresholds['sat'], self.high_thresholds['val'] ]
@@ -283,8 +309,7 @@ class TargetTracker:
             if area > biggest_contour_area:
                 biggest_contour_area = area
                 biggest_contour = contours[i]
-                biggest_contour_indx = i
-        
+                biggest_contour_indx = i  
             
         # Draw contours and bounding box of biggest contour on image
         if biggest_contour is not None:
@@ -292,25 +317,32 @@ class TargetTracker:
             cv2.drawContours(image, contours, biggest_contour_indx, (255,255,255), 2)
         
             # Draw bounding box in yellow of biggest contour on image
-            #bound_box = cv2.boundingRect(biggest_contour)
+            bound_box = cv2.boundingRect(biggest_contour)
             #cv2.rectangle(image, bound_box, (255,255,0), 1, 8, 0)
-    
-                
+        else:
+            bound_box = None
+        
         # Return biggest region
-        return biggest_contour
+        return biggest_contour, bound_box
     
     
-    def find_blob(self):
-        pass
-    
-    
-    def blob_tracker(self):
-        pass    
-    
-    
-    def distance_from_blob_size(self, blob_size):
-        """hello i am a docstring"""
-        pass
+    def distance_from_target(self, blob):
+        """Computes the distance from target from the biggest contour area
+            (number of pixels in contour)."""
+
+        if blob is not None:
+            area = cv2.contourArea(blob, False)
+            
+            # If using bounding box to compute area
+            # Not using because bounding box area fluctuates too much
+            #area = (abs(box[2]-box[0]))*(abs(box[3]-box[1]))
+            
+            # This is just a dummy number for now
+            distance = (1/area) * 100000
+        else:
+            distance = float('nan')
+        
+        return distance
     
     
 
